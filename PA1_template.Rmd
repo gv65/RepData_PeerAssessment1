@@ -67,8 +67,7 @@ Interval and mean report
 interval.mean.steps[which.max(interval.mean.steps$mean), ]
 ```
 
-Obs:
-#The persons daily activity peak around 8.35am
+Obs:# The persons daily activity peak around 8.35am
 
 ## Inputting missing values
 
@@ -176,10 +175,7 @@ print (p)
 
 ````
 
-
-
-Obs:
-# Yes. The plot indicates that the person moves around more during the weekend days.
+Obs:# Yes. The plot indicates that the person moves around more during the weekend days.
 
 
 
