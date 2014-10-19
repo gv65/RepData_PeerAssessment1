@@ -1,14 +1,10 @@
---------------------------------------------------------
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
---------------------------------------------------------
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 Unzipping the data and loading csv file
-```{r}
+
+```r
 data <- read.table(unz("D:\\Courses\\ReproducibleRsearch\\PeerAssignment1\\RepData_PeerAssessment1\\activity.zip", "activity.csv"), header=T, quote="\"", sep=",")
 data$date <- as.Date(data$date) 
 ```
@@ -17,7 +13,8 @@ data$date <- as.Date(data$date)
 
 Creating the dataset by ignoring the missing values
 
-```{r}
+
+```r
 data.ignore.na <- na.omit(data) 
 daily.steps <- rowsum(data.ignore.na$steps, format(data.ignore.na$date, '%Y-%m-%d')) 
 daily.steps <- data.frame(daily.steps) 
@@ -25,17 +22,31 @@ names(daily.steps) <- ("steps")
 ```
 
 Plotting the graph
-```{r}
+
+```r
 hist(daily.steps$steps, main=" ", breaks=10,
      xlab="Total Number of Steps Taken Daily")
-
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 Mean and Median calculation
 
-```{r}
+
+```r
 mean(daily.steps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(daily.steps$steps)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -46,14 +57,16 @@ median(daily.steps$steps)
 number of steps?
 4. Observer and comment the average daily activity pattern
 
-```{r}
+
+```r
 library(plyr)
 interval.mean.steps <- ddply(data.ignore.na,~interval, summarise, mean=mean(steps))
 ```
 
 Plotting the graph
 
-```{r}
+
+```r
 library(ggplot2)
 qplot(x=interval, y=mean, data = interval.mean.steps,  geom = "line",
       xlab="5-Minute Interval (military time)",
@@ -62,9 +75,17 @@ qplot(x=interval, y=mean, data = interval.mean.steps,  geom = "line",
       )
 ```
 
+![](./PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 Interval and mean report
-```{r}
+
+```r
 interval.mean.steps[which.max(interval.mean.steps$mean), ]
+```
+
+```
+##     interval     mean
+## 104      835 206.1698
 ```
 
 Obs:
@@ -74,8 +95,20 @@ Obs:
 
 Calculating and reporting the number of missing values
 
-```{r}
+
+```r
 library(sqldf)
+```
+
+```
+## Loading required package: gsubfn
+## Loading required package: proto
+## Loading required package: RSQLite
+## Loading required package: DBI
+## Loading required package: RSQLite.extfuns
+```
+
+```r
 totalNA <- sqldf(' 
     SELECT d.*            
     FROM "data" as d
@@ -83,13 +116,23 @@ totalNA <- sqldf('
     ORDER BY d.date, d.interval ') 
 ```
 
-```{r}
+```
+## Loading required package: tcltk
+```
+
+
+```r
 NROW(totalNA) 
+```
+
+```
+## [1] 2304
 ```
 
 Filling of missing values
 
-```{r}
+
+```r
 t1 <- sqldf('  
     SELECT d.*, i.mean
     FROM "interval.mean.steps" as i
@@ -102,7 +145,8 @@ t1$steps[is.na(t1$steps)] <- t1$mean[is.na(t1$steps)]
 
 Data preparation to calulate mean and mediation
 
-```{r}
+
+```r
 t1.total.steps <- as.integer( sqldf(' 
     SELECT sum(steps)  
     FROM t1') );
@@ -116,17 +160,18 @@ daily.61.steps <- sqldf('
     SELECT date, t1_total_steps_by_date as "steps"
     FROM "t1.total.steps.by.date"
     ORDER BY date') 
-
 ```
 
 Graph plotting
-```{r}
+
+```r
 hist(daily.61.steps$steps, 
      main=" ",
      breaks=10,
      xlab="After Imputate NA -Total Number of Steps Taken Daily")
-
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
 
 
 
@@ -135,14 +180,24 @@ hist(daily.61.steps$steps,
 
 Mean and mediation calculation and report
 
-```{r}
+
+```r
 t1.mean.steps.per.day <- as.integer(t1.total.steps / NROW(t1.total.steps.by.date) )
 t1.mean.steps.per.day
 ```
 
-```{r}
+```
+## [1] 10766
+```
+
+
+```r
 t1.median.steps.per.day <- median(t1.total.steps.by.date$t1.total.steps.by.date)
 t1.median.steps.per.day
+```
+
+```
+## [1] 10766.19
 ```
 
 
@@ -151,7 +206,8 @@ t1.median.steps.per.day
 
 Weekday and Weekends data preparation
 
-```{r}
+
+```r
 t1$weektime <- as.factor(ifelse(weekdays(t1$date) %in% 
                 c("Saturday","Sunday"),"weekend", "weekday"))
 
@@ -164,7 +220,8 @@ t5 <- sqldf('
 
 Plotting the graph
 
-```{r}
+
+```r
 library("lattice")
 p <- xyplot(mean.steps ~ interval | factor(weektime), data=t5, 
        type = 'l',
@@ -173,13 +230,7 @@ p <- xyplot(mean.steps ~ interval | factor(weektime), data=t5,
        xlab="5-Minute Interval (military time)",
        ylab="Average Number of Steps Taken")
 print (p)  
+```
 
-````
-
-
-
-Obs:
-# Yes. The plot indicates that the person moves around more during the weekend days.
-
-
+![](./PA1_template_files/figure-html/unnamed-chunk-16-1.png) 
 
